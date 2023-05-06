@@ -34,66 +34,73 @@ class HomePage extends StatelessWidget {
         ],
       ),
       drawer: const Drawer(),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Explore",
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  const Text(
-                    "Best marketplace ever for shopping",
-                    style: TextStyle(color: Colors.grey, fontSize: 15),
-                  )
-                ],
-              )),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: SearchField(),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children:
-                products.category.map((e) => CategoryItem(text: e)).toList(),
-          ),
-          Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "New Arrival",
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
-                  ),
-                  TextButton(onPressed: () {}, child: const Text("More"))
-                ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Explore",
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                    const Text(
+                      "Best marketplace ever for shopping",
+                      style: TextStyle(color: Colors.grey, fontSize: 15),
+                    )
+                  ],
+                )),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+              child: SearchField(),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: products.category
+                    .map((e) => CategoryItem(text: e))
+                    .toList(),
               ),
-              FutureBuilder<List<Product>>(
-                  future: products.products,
-                  initialData: const [],
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return SizedBox(
-                        height: 250,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (context, index) =>
-                                ProductItem(product: snapshot.data![index])),
-                      );
-                    } else {
-                      return const CircularProgressIndicator();
-                    }
-                  }),
-            ],
-          )
-        ],
+            ),
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "New Arrival",
+                      style:
+                          TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+                    ),
+                    TextButton(onPressed: () {}, child: const Text("More"))
+                  ],
+                ),
+                FutureBuilder<List<Product>>(
+                    future: products.products,
+                    initialData: const [],
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return SizedBox(
+                          height: 250,
+                          child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: snapshot.data!.length,
+                              itemBuilder: (context, index) =>
+                                  ProductItem(product: snapshot.data![index])),
+                        );
+                      } else {
+                        return const CircularProgressIndicator();
+                      }
+                    }),
+              ],
+            )
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.primaries.first,
