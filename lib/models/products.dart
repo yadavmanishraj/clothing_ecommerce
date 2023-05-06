@@ -7,24 +7,38 @@ import 'package:flutter/material.dart';
 
 class Products extends ChangeNotifier {
   Products(this._repository);
-  final List<int> _cart = [];
-  final List<int> _favorites = [];
+  final List<Product> _cart = [];
+  final List<Product> _favorites = [];
   final List<String> category = UnmodifiableListView(
       ["electronics", "jewelery", "men's clothing", "women's clothing"]);
+  final List<Product> _products = [];
 
-  List<int> get cart => UnmodifiableListView(_cart);
-  List<int> get favorites => UnmodifiableListView(_favorites);
+  List<Product> get cart => UnmodifiableListView(_cart);
+  List<Product> get favorites => UnmodifiableListView(_favorites);
+  double get subtotal {
+    if (cart.isEmpty) return 0;
+    return double.parse(cart
+        .map((e) => e.price)
+        .toList()
+        .reduce((value, element) => value + element)
+        .toStringAsFixed(3));
+  }
 
   final ProductRepository _repository;
 
-  Future<List<Product>> get products => _repository.getProducts();
+  Future<List<Product>> get products async {
+    if (_products.isNotEmpty) {
+      return UnmodifiableListView(_products);
+    }
+    return _repository.getProducts();
+  }
 
-  void addToCart(int productId) {
+  void addToCart(Product productId) {
     _cart.add(productId);
     notifyListeners();
   }
 
-  void removeFromCart(int productId) {
+  void removeFromCart(Product productId) {
     _cart.remove(productId);
     notifyListeners();
   }

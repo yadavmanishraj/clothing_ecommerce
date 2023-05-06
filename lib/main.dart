@@ -21,7 +21,7 @@ final _routes = GoRouter(routes: [
   GoRoute(
       path: HomePage.route,
       builder: (context, state) {
-        return const HomePage();
+        return  HomePage();
       }),
   GoRoute(
       path: Favoritepage.route,

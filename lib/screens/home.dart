@@ -1,13 +1,25 @@
 import 'package:clothing_ecommerce/api/models/product.dart';
 import 'package:clothing_ecommerce/models/products.dart';
+import 'package:clothing_ecommerce/screens/cart_page.dart';
 import 'package:clothing_ecommerce/widgets/search_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   static String route = '/';
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final PageController pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,83 +46,123 @@ class HomePage extends StatelessWidget {
         ],
       ),
       drawer: const Drawer(),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Explore",
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                    const Text(
-                      "Best marketplace ever for shopping",
-                      style: TextStyle(color: Colors.grey, fontSize: 15),
-                    )
-                  ],
-                )),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
-              child: SearchField(),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: products.category
-                    .map((e) => CategoryItem(text: e))
-                    .toList(),
-              ),
-            ),
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "New Arrival",
-                      style:
-                          TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
-                    ),
-                    TextButton(onPressed: () {}, child: const Text("More"))
-                  ],
-                ),
-                FutureBuilder<List<Product>>(
-                    future: products.products,
-                    initialData: const [],
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return SizedBox(
-                          height: 250,
-                          child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: snapshot.data!.length,
-                              itemBuilder: (context, index) =>
-                                  ProductItem(product: snapshot.data![index])),
-                        );
-                      } else {
-                        return const CircularProgressIndicator();
-                      }
-                    }),
-              ],
-            )
-          ],
-        ),
+      body: PageView(
+        onPageChanged: (value) {
+          setState(() {
+            index = value;
+          });
+        },
+        controller: pageController,
+        scrollDirection: Axis.horizontal,
+        children: [
+          Dashboard(products: products),
+          const CartPage(),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.primaries.first,
         unselectedItemColor: Colors.grey,
+        currentIndex: index,
+        onTap: (value) {
+          updateIndex(value);
+        },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart_checkout), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: ""),
+              icon: Icon(Icons.shopping_cart_checkout), label: "Cart"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.favorite_border), label: "Favorites"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline), label: "Account"),
+        ],
+      ),
+    );
+  }
+
+  int index = 0;
+
+  void updateIndex(int ind) {
+    setState(() {
+      index = ind;
+      pageController.animateToPage(ind,
+          duration: const Duration(milliseconds: 500), curve: Curves.linear);
+    });
+  }
+}
+
+class Dashboard extends StatelessWidget {
+  const Dashboard({
+    super.key,
+    required this.products,
+  });
+
+  final Products products;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Explore",
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const Text(
+                    "Best marketplace ever for shopping",
+                    style: TextStyle(color: Colors.grey, fontSize: 15),
+                  )
+                ],
+              )),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
+            child: SearchField(),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children:
+                  products.category.map((e) => CategoryItem(text: e)).toList(),
+            ),
+          ),
+          Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "New Arrival",
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+                  ),
+                  TextButton(onPressed: () {}, child: const Text("More"))
+                ],
+              ),
+              FutureBuilder<List<Product>>(
+                  future: products.products,
+                  initialData: const [],
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return SizedBox(
+                        height: 250,
+                        child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: snapshot.data!.length,
+                            itemBuilder: (context, index) =>
+                                ProductItem(product: snapshot.data![index])),
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  }),
+            ],
+          )
         ],
       ),
     );
@@ -170,11 +222,11 @@ class ProductItem extends StatelessWidget {
               alignment: Alignment.topRight,
               child: IconButton(
                   onPressed: () {
-                    !products.cart.contains(product.id)
-                        ? products.addToCart(product.id)
-                        : products.removeFromCart(product.id);
+                    !products.cart.contains(product)
+                        ? products.addToCart(product)
+                        : products.removeFromCart(product);
                   },
-                  icon: products.cart.contains(product.id)
+                  icon: products.cart.contains(product)
                       ? const Icon(
                           Icons.favorite,
                           color: Colors.deepOrange,
